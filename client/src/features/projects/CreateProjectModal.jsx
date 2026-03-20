@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 function CreateProjectModal({ onClose, onSubmit }) {
   const [projectName, setProjectName] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedMembers, setSelectedMembers] = useState([]);
   const [deadline, setDeadline] = useState('');
+  const [selectedMembers, setSelectedMembers] = useState([]);
 
   const availableMembers = [
     { id: 1, name: 'Hari' },
@@ -13,7 +13,7 @@ function CreateProjectModal({ onClose, onSubmit }) {
     { id: 4, name: 'TL Raj' },
   ];
 
-  // Create quick lookup map
+  // Fast lookup map (optimized)
   const memberMap = Object.fromEntries(
     availableMembers.map(m => [m.id, m.name])
   );
@@ -27,12 +27,12 @@ function CreateProjectModal({ onClose, onSubmit }) {
     }
 
     const newProject = {
-      id: crypto.randomUUID(),
+      id: crypto.randomUUID(), // better than Date.now()
       name: projectName.trim(),
       description: description.trim(),
+      deadline: deadline || null,
       status: 'Pending',
       createdAt: new Date().toLocaleDateString(),
-      deadline: deadline || 'Not set',
       members: selectedMembers.map(id => memberMap[id] || 'Unknown'),
     };
 
@@ -42,8 +42,8 @@ function CreateProjectModal({ onClose, onSubmit }) {
     // Reset form
     setProjectName('');
     setDescription('');
-    setSelectedMembers([]);
     setDeadline('');
+    setSelectedMembers([]);
   };
 
   return (
@@ -61,7 +61,7 @@ function CreateProjectModal({ onClose, onSubmit }) {
 
         <form onSubmit={handleSubmit}>
 
-          {/* Members (Checkbox style) */}
+          {/* Members (Checkbox UX - BEST) */}
           <div className="mb-6">
             <label className="block text-gray-700 font-medium mb-2">
               Assign Members
@@ -74,12 +74,11 @@ function CreateProjectModal({ onClose, onSubmit }) {
                     type="checkbox"
                     checked={selectedMembers.includes(member.id)}
                     onChange={(e) => {
-                      const id = member.id;
                       if (e.target.checked) {
-                        setSelectedMembers([...selectedMembers, id]);
+                        setSelectedMembers([...selectedMembers, member.id]);
                       } else {
                         setSelectedMembers(
-                          selectedMembers.filter(m => m !== id)
+                          selectedMembers.filter(id => id !== member.id)
                         );
                       }
                     }}
@@ -148,6 +147,7 @@ function CreateProjectModal({ onClose, onSubmit }) {
               Create Project
             </button>
           </div>
+
         </form>
       </div>
     </div>

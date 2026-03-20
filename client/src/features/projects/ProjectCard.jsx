@@ -1,6 +1,7 @@
 import React from 'react';
 
 function ProjectCard({ project, onDelete }) {
+
   const getInitials = (name) => {
     if (!name) return '?';
     const names = name.split(' ');
@@ -19,10 +20,45 @@ function ProjectCard({ project, onDelete }) {
     return colors[Math.abs(hash) % colors.length];
   };
 
+  // 🔥 Smart Deadline Logic
+  const getDeadlineInfo = () => {
+    if (!project.deadline) return null;
+
+    const today = new Date();
+    const deadlineDate = new Date(project.deadline);
+
+    const diffTime = deadlineDate - today;
+    const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    let color = 'text-green-600';
+    let label = `${project.deadline}`;
+
+    if (daysLeft < 0) {
+      color = 'text-red-600 font-bold';
+      label = `Overdue (${Math.abs(daysLeft)} days ago)`;
+    } else if (daysLeft === 0) {
+      color = 'text-red-600 font-bold';
+      label = `Due Today`;
+    } else if (daysLeft <= 3) {
+      color = 'text-orange-600 font-semibold';
+      label = `${daysLeft} day(s) left`;
+    } else if (daysLeft <= 7) {
+      color = 'text-yellow-600';
+      label = `${daysLeft} days left`;
+    } else {
+      color = 'text-green-600';
+      label = `${daysLeft} days left`;
+    }
+
+    return { color, label };
+  };
+
+  const deadlineInfo = getDeadlineInfo();
+
   return (
     <div className="bg-white p-6 rounded-xl shadow hover:shadow-xl transition duration-300 border border-gray-100 relative">
-      
-      {/* Delete button */}
+
+      {/* Delete Button */}
       <button
         onClick={() => onDelete(project.id)}
         className="absolute top-3 right-3 text-red-500 hover:text-red-700 text-sm font-medium hover:bg-red-50 px-2 py-1 rounded transition"
@@ -40,8 +76,8 @@ function ProjectCard({ project, onDelete }) {
         {project.description || 'No description provided'}
       </p>
 
-      {/* Status + Created Date */}
-      <div className="flex justify-between items-center text-sm mb-2">
+      {/* Status + Created */}
+      <div className="flex justify-between items-center text-sm mb-3">
         <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full font-medium">
           {project.status}
         </span>
@@ -50,12 +86,12 @@ function ProjectCard({ project, onDelete }) {
         </span>
       </div>
 
-      {/* ✅ Deadline Added Here */}
-      {project.deadline && (
-        <div className="mt-2 text-sm">
+      {/* 🔥 Deadline Section */}
+      {deadlineInfo && (
+        <div className="mb-4 text-sm">
           <span className="text-gray-600 font-medium">Deadline: </span>
-          <span className="text-red-600 font-medium">
-            {project.deadline}
+          <span className={deadlineInfo.color}>
+            {deadlineInfo.label}
           </span>
         </div>
       )}
@@ -66,6 +102,7 @@ function ProjectCard({ project, onDelete }) {
           <p className="text-sm text-gray-600 font-medium mb-2">
             Team Members:
           </p>
+
           <div className="flex flex-wrap gap-2">
             {project.members.map((member, idx) => (
               <div key={idx} className="relative group" title={member}>
@@ -83,6 +120,7 @@ function ProjectCard({ project, onDelete }) {
           No members assigned yet
         </div>
       )}
+
     </div>
   );
 }
